@@ -1,0 +1,18 @@
+# Ambientes virtuais
+.venv/
+env/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Banco de dados local
+*.db
+
+# VSCode
+.vscode/
+
+# Arquivos sensíveis
+.env
+instance/
