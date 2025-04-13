@@ -157,5 +157,13 @@ def main():
             st.session_state["authenticated"] = False
             st.rerun()
 
+st.set_page_config(
+    page_title="Numerador Itapipoca",  # título da aba do navegador
+    page_icon="📄",                    # ícone da aba (pode ser emoji ou URL)
+    layout="centered",                 # ou "wide"
+    initial_sidebar_state="auto"      # ou "expanded" ou "collapsed"
+)
+
+
 if __name__ == "__main__":
     main()
