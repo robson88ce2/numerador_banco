@@ -98,7 +98,9 @@ def main():
         menu = st.sidebar.radio("Navegação", ["📄 Gerar Documento", "📜 Histórico", "🔁 Status", "🚪 Sair"])
 
         st.sidebar.markdown("---")
-        st.sidebar.markdown("🔹 Sistema de Numerador de Documentos")
+        st.sidebar.markdown("💠Sistema de Numerador de Documentos   \n\n\n<span style='font-size: 12px; color: #ccc;'>By Robson Oliveira</span>", unsafe_allow_html=True)
+
+
 
         if menu == "📄 Gerar Documento":
             st.title("📄 Numerador de Documentos")
