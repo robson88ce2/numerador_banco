@@ -95,7 +95,7 @@ def main():
     else:
         st.sidebar.image("imagens/brasao.png", width=150)
         st.sidebar.markdown("## 📄 Delegacia de Itapipoca ")
-        menu = st.sidebar.radio("Navegação", ["📄 Gerar Documento", "📜 Histórico", "🚪 Sair"])
+        menu = st.sidebar.radio("Navegação", ["📄 Gerar Documento", "📜 Histórico", "🔁 Status", "🚪 Sair"])
 
         st.sidebar.markdown("---")
         st.sidebar.markdown("🔹 Sistema de Numerador de Documentos")
@@ -128,6 +128,13 @@ def main():
                         st.code(numero, language="text")
                 else:
                     st.error("Por favor, informe o destino.")
+
+        
+        elif menu == "🔁 Status":
+            st.title("🔁 Status do Sistema")
+            st.success("✅ Online")
+
+        
 
         elif menu == "📜 Histórico":
             st.title("📜 Histórico de Documentos")
