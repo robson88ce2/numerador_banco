@@ -94,7 +94,7 @@ def main():
         login()
     else:
         st.sidebar.image("imagens/brasao.png", width=150)
-        st.sidebar.markdown("## 📄 Menu Principal")
+        st.sidebar.markdown("## 📄 Delegacia de Itapipoca ")
         menu = st.sidebar.radio("Navegação", ["📄 Gerar Documento", "📜 Histórico", "🚪 Sair"])
 
         st.sidebar.markdown("---")
