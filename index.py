@@ -1,20 +1,36 @@
 from datetime import datetime
-import sqlite3
+import psycopg2
 import streamlit as st
 import pandas as pd
 from contextlib import closing
 
-# Função para criar conexão com o banco de dados
+# Conexão com PostgreSQL
 def get_db_connection():
-    conn = sqlite3.connect("numerador.db", check_same_thread=False)
-    conn.execute("PRAGMA journal_mode=WAL;")  
-    return conn
+    return psycopg2.connect(
+        host=st.secrets["postgres"]["host"],
+        port=st.secrets["postgres"]["port"],
+        dbname=st.secrets["postgres"]["dbname"],
+        user=st.secrets["postgres"]["user"],
+        password=st.secrets["postgres"]["password"]
+    )
 
-# Criar tabelas se não existirem
+# Executar queries
+def execute_query(query, params=None, fetch=False):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, params or ())
+                if fetch:
+                    return cursor.fetchall()
+    except psycopg2.Error as e:
+        st.error(f"Erro no banco de dados: {e}")
+        return None
+
+# Criar tabelas
 def create_tables():
     execute_query("""
         CREATE TABLE IF NOT EXISTS documentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             tipo TEXT,
             numero TEXT,
             destino TEXT,
@@ -29,51 +45,45 @@ def create_tables():
         )
     """)
 
-# Executar consultas no banco de dados
-def execute_query(query, params=None, fetch=False):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, params or ())
-        result = cursor.fetchall() if fetch else None
-        conn.commit()
-        conn.close()
-        return result
-    except sqlite3.Error as e:
-        st.error(f"Erro no banco de dados: {e}")
-        return None
-
-# Gerar o próximo número sequencial
+# Próximo número sequencial
 def get_next_number(tipo):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT ultimo_numero FROM indices WHERE tipo = ?", (tipo,))
-    row = cursor.fetchone()
-    novo_numero = (row[0] + 1) if row else 1
-    cursor.execute("INSERT INTO indices (tipo, ultimo_numero) VALUES (?, ?) ON CONFLICT(tipo) DO UPDATE SET ultimo_numero = ?", (tipo, novo_numero, novo_numero))
-    conn.commit()
-    conn.close()
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT ultimo_numero FROM indices WHERE tipo = %s", (tipo,))
+            row = cursor.fetchone()
+            novo_numero = (row[0] + 1) if row else 1
+
+            cursor.execute("""
+                INSERT INTO indices (tipo, ultimo_numero)
+                VALUES (%s, %s)
+                ON CONFLICT (tipo)
+                DO UPDATE SET ultimo_numero = EXCLUDED.ultimo_numero
+            """, (tipo, novo_numero))
+            conn.commit()
+
     return f"{novo_numero:03d}/{datetime.now().year}"
 
-# Salvar documento no banco de dados
+# Salvar documento
 def save_document(tipo, destino, data_emissao):
     while True:
         numero = get_next_number(tipo)
         try:
-            execute_query("INSERT INTO documentos (tipo, numero, destino, data_emissao) VALUES (?, ?, ?, ?)", (tipo, numero, destino, data_emissao))
+            execute_query("""
+                INSERT INTO documentos (tipo, numero, destino, data_emissao)
+                VALUES (%s, %s, %s, %s)
+            """, (tipo, numero, destino, data_emissao))
             return numero
-        except sqlite3.IntegrityError:
-            continue  # Se o número já existe, tenta novamente
+        except psycopg2.errors.UniqueViolation:
+            continue
 
 # Estado de autenticação
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
-# Função de login com layout aprimorado
+# Login
 def login():
     st.sidebar.image("imagens/brasao.png", width=150)
     st.sidebar.markdown("## 🔒 Acesso Restrito")
-    
     with st.sidebar.form("login_form"):
         username = st.text_input("Usuário")
         password = st.text_input("Senha", type="password")
@@ -86,10 +96,10 @@ def login():
         else:
             st.sidebar.error("Usuário ou senha incorretos!")
 
-# Interface principal
+# Main
 def main():
     create_tables()
-    
+
     if not st.session_state["authenticated"]:
         login()
     else:
@@ -99,8 +109,6 @@ def main():
 
         st.sidebar.markdown("---")
         st.sidebar.markdown("💠Sistema de Numerador de Documentos   \n\n\n<span style='font-size: 12px; color: #ccc;'>By Robson Oliveira</span>", unsafe_allow_html=True)
-
-
 
         if menu == "📄 Gerar Documento":
             st.title("📄 Numerador de Documentos")
@@ -131,41 +139,35 @@ def main():
                 else:
                     st.error("Por favor, informe o destino.")
 
-        
-        elif menu == "🔁 Status":
-            st.title("🔁 Status do Sistema")
-            st.success("✅ Online")
-
-        
-
         elif menu == "📜 Histórico":
             st.title("📜 Histórico de Documentos")
             st.markdown("Consulte os documentos gerados anteriormente.")
+            try:
+                df = pd.read_sql_query("SELECT tipo, numero, data_emissao, destino FROM documentos ORDER BY id DESC", con=get_db_connection())
+                if not df.empty:
+                    filtro_tipo = st.selectbox("Filtrar por Tipo", ["Todos"] + sorted(set(df['tipo'])))
+                    if filtro_tipo != "Todos":
+                        df = df[df['tipo'] == filtro_tipo]
+                    st.dataframe(df, height=300, use_container_width=True)
+                else:
+                    st.warning("Nenhum documento encontrado.")
+            except Exception as e:
+                st.error(f"Erro ao carregar dados: {e}")
 
-            conn = get_db_connection()
-            df = pd.read_sql_query("SELECT tipo, numero, data_emissao, destino FROM documentos ORDER BY id DESC", conn)
-            conn.close()
-
-            if not df.empty:
-                filtro_tipo = st.selectbox("Filtrar por Tipo", ["Todos"] + sorted(set(df['tipo'])))
-                if filtro_tipo != "Todos":
-                    df = df[df['tipo'] == filtro_tipo]
-                
-                st.dataframe(df, height=300, use_container_width=True)
-            else:
-                st.warning("Nenhum documento encontrado.")
+        elif menu == "🔁 Status":
+            st.title("🔁 Status do Sistema")
+            st.success("✅ Online")
 
         elif menu == "🚪 Sair":
             st.session_state["authenticated"] = False
             st.rerun()
 
 st.set_page_config(
-    page_title="Numerador Itapipoca",  # título da aba do navegador
-    page_icon="📄",                    # ícone da aba (pode ser emoji ou URL)
-    layout="centered",                 # ou "wide"
-    initial_sidebar_state="auto"      # ou "expanded" ou "collapsed"
+    page_title="Numerador Itapipoca",
+    page_icon="📄",
+    layout="centered",
+    initial_sidebar_state="auto"
 )
-
 
 if __name__ == "__main__":
     main()
