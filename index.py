@@ -51,7 +51,7 @@ def get_next_number(tipo):
         with conn.cursor() as cursor:
             cursor.execute("SELECT ultimo_numero FROM indices WHERE tipo = %s", (tipo,))
             row = cursor.fetchone()
-            novo_numero = (row[0] + 1) if row else 1
+            novo_numero = (row[1024] + 1) if row else 1
 
             cursor.execute("""
                 INSERT INTO indices (tipo, ultimo_numero)
