@@ -126,13 +126,18 @@ def backup_documentos():
 def login():
     st.sidebar.image("imagens/brasao.png", width=150)
     st.sidebar.markdown("## 🔒 Acesso Restrito")
+
+    # Carrega as credenciais do secrets
+    config_username = st.secrets["auth"]["username"]
+    config_password = st.secrets["auth"]["password"]
+
     with st.sidebar.form("login_form"):
         username = st.text_input("Usuário")
         password = st.text_input("Senha", type="password")
         login_button = st.form_submit_button("Entrar")
 
     if login_button:
-        if username == "DRITAPIPOCA" and password == "Itapipoca2024":
+        if username == config_username and password == config_password:
             st.session_state["authenticated"] = True
             st.rerun()
         else:
