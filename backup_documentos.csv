@@ -1,0 +1,177 @@
+id,tipo,numero,destino,data_emissao
+1,Oficio,001/2025,gerado automaticamente pelo sistema,21/04/2025
+2,Oficio,002/2025,gerado automaticamente pelo sistema,21/04/2025
+3,Protocolo,001/2025,gerado automaticamente pelo sistema,21/04/2025
+4,Despacho,001/2025,gerado automaticamente pelo sistema,21/04/2025
+5,Relatório Policial,001/2025,gerado automaticamente pelo sistema,21/04/2025
+6,Verificação de Procedência de Informação - VPI,001/2025,gerado automaticamente pelo sistema,21/04/2025
+7,Carta Precatória Expedida,001/2025,gerado automaticamente pelo sistema,21/04/2025
+8,Carta Precatória Recebida,001/2025,gerado automaticamente pelo sistema,21/04/2025
+9,Intimação,001/2025,gerado automaticamente pelo sistema,21/04/2025
+10,Oficio,003/2025,gerado automaticamente pelo sistema,21/04/2025
+11,Oficio,004/2025,gerado automaticamente pelo sistema,21/04/2025
+12,Oficio,005/2025,gerado automaticamente pelo sistema,21/04/2025
+13,Oficio,006/2025,gerado automaticamente pelo sistema,21/04/2025
+14,Oficio,007/2025,gerado automaticamente pelo sistema,21/04/2025
+15,Oficio,008/2025,gerado automaticamente pelo sistema,21/04/2025
+16,Oficio,009/2025,gerado automaticamente pelo sistema,21/04/2025
+17,Oficio,010/2025,gerado automaticamente pelo sistema,21/04/2025
+18,Oficio,011/2025,gerado automaticamente pelo sistema,21/04/2025
+19,Oficio,012/2025,gerado automaticamente pelo sistema,21/04/2025
+20,Oficio,013/2025,gerado automaticamente pelo sistema,21/04/2025
+21,Oficio,014/2025,gerado automaticamente pelo sistema,21/04/2025
+22,Oficio,015/2025,gerado automaticamente pelo sistema,21/04/2025
+23,Oficio,016/2025,gerado automaticamente pelo sistema,21/04/2025
+24,Oficio,017/2025,gerado automaticamente pelo sistema,21/04/2025
+25,Oficio,018/2025,gerado automaticamente pelo sistema,21/04/2025
+26,Oficio,019/2025,gerado automaticamente pelo sistema,21/04/2025
+27,Oficio,020/2025,gerado automaticamente pelo sistema,21/04/2025
+28,Oficio,021/2025,gerado automaticamente pelo sistema,21/04/2025
+29,Oficio,022/2025,gerado automaticamente pelo sistema,21/04/2025
+30,Oficio,023/2025,gerado automaticamente pelo sistema,21/04/2025
+31,Oficio,024/2025,gerado automaticamente pelo sistema,21/04/2025
+32,Oficio,025/2025,gerado automaticamente pelo sistema,21/04/2025
+33,Oficio,026/2025,gerado automaticamente pelo sistema,21/04/2025
+34,Oficio,027/2025,gerado pelo sistema,21/04/2025
+35,Oficio,028/2025,gerado pelo sistema,21/04/2025
+36,Oficio,029/2025,gerado pelo sistema,21/04/2025
+37,Oficio,030/2025,gerado pelo sistema,21/04/2025
+38,Oficio,031/2025,gerado pelo sistema,21/04/2025
+39,Oficio,032/2025,gerado pelo sistema,21/04/2025
+40,Oficio,033/2025,gerado pelo sistema,21/04/2025
+41,Oficio,034/2025,gerado pelo sistema,21/04/2025
+42,Oficio,035/2025,gerado pelo sistema,21/04/2025
+43,Oficio,036/2025,gerado pelo sistema,21/04/2025
+44,Oficio,037/2025,gerado pelo sistema,21/04/2025
+45,Oficio,038/2025,gerado pelo sistema,21/04/2025
+46,Oficio,039/2025,gerado pelo sistema,21/04/2025
+47,Oficio,040/2025,gerado pelo sistema,21/04/2025
+48,Oficio,041/2025,gerado pelo sistema,21/04/2025
+49,Oficio,042/2025,gerado pelo sistema,21/04/2025
+50,Oficio,043/2025,gerado pelo sistema,21/04/2025
+51,Oficio,044/2025,gerado pelo sistema,21/04/2025
+52,Oficio,045/2025,gerado pelo sistema,21/04/2025
+53,Oficio,046/2025,gerado pelo sistema,21/04/2025
+54,Oficio,047/2025,gerado pelo sistema,21/04/2025
+55,Oficio,048/2025,gerado pelo sistema,21/04/2025
+56,Oficio,049/2025,gerado pelo sistema,21/04/2025
+57,Protocolo,002/2025,gerado pelo sistema,21/04/2025
+58,Ordem de Missão,001/2025,gerado pelo sistema,21/04/2025
+59,Ordem de Missão,002/2025,gerado pelo sistema,21/04/2025
+60,Ordem de Missão,003/2025,gerado pelo sistema,21/04/2025
+61,Oficio,050/2025,gerado pelo sistema,21/04/2025
+62,Oficio,051/2025,gerado pelo sistema,21/04/2025
+63,Oficio,052/2025,gerado pelo sistema,21/04/2025
+64,Protocolo,003/2025,gerado pelo sistema,21/04/2025
+65,Ordem de Missão,004/2025,gerado pelo sistema,21/04/2025
+66,Oficio,053/2025,gerado pelo sistema,21/04/2025
+67,Oficio,054/2025,gerado automaticamente pelo sistema,21/04/2025
+68,Oficio,055/2025,gerado automaticamente pelo sistema,21/04/2025
+69,Oficio,1024/2025,gerado automaticamente pelo sistema,21/04/2025
+70,Oficio,1025/2025,gerado automaticamente pelo sistema,21/04/2025
+71,Protocolo,004/2025,gerado pelo sistema,22/04/2025
+72,Protocolo,005/2025,gerado pelo sistema,22/04/2025
+73,Ordem de Missão,005/2025,gerado pelo sistema,22/04/2025
+74,Ordem de Missão,006/2025,gerado pelo sistema,22/04/2025
+75,Relatório Policial,002/2025,gerado pelo sistema,22/04/2025
+76,Relatório Policial,003/2025,gerado pelo sistema,22/04/2025
+77,Relatório Policial,004/2025,gerado pelo sistema,22/04/2025
+78,Intimação,002/2025,gerado pelo sistema,22/04/2025
+79,Intimação,003/2025,gerado pelo sistema,22/04/2025
+80,Intimação,004/2025,gerado pelo sistema,22/04/2025
+81,Intimação,005/2025,gerado pelo sistema,22/04/2025
+82,Intimação,006/2025,gerado pelo sistema,22/04/2025
+83,Oficio,1026/2025,Gerado automaticamente,22/04/2025
+84,Intimação,007/2025,N.O,22/04/2025
+85,Oficio,1027/2025,2013/20214,22/04/2025
+86,Ordem de Missão,007/2025,Inspetoria,22/04/2025
+87,Ordem de Missão,008/2025,Inspetoria,22/04/2025
+88,Ordem de Missão,009/2025,Inspetoria,22/04/2025
+89,Ordem de Missão,010/2025,Inspetoria,22/04/2025
+90,Oficio,1028/2025,Pefoce,22/04/2025
+91,Oficio,1029/2025,Pefoce,22/04/2025
+92,Oficio,1030/2025,Pefoce,22/04/2025
+93,Oficio,1031/2025,Pefoce,22/04/2025
+94,Oficio,1032/2025,Pefoce,22/04/2025
+95,Oficio,1033/2025,Pefoce,22/04/2025
+96,Oficio,1034/2025,Pefoce,22/04/2025
+97,Oficio,1035/2025,Pefoce,22/04/2025
+98,Oficio,1036/2025,Pefoce,22/04/2025
+99,Oficio,1037/2025,Pefoce,22/04/2025
+100,Oficio,1038/2025,Pefoce,22/04/2025
+101,Oficio,1039/2025,Pefoce,22/04/2025
+102,Oficio,1040/2025,Pefoce,22/04/2025
+103,Oficio,1041/2025,Pefoce,22/04/2025
+104,Oficio,1042/2025,Pefoce,22/04/2025
+105,Oficio,1043/2025,Pefoce,22/04/2025
+106,Oficio,1044/2025,Pefoce,22/04/2025
+107,Ordem de Missão,011/2025,Inspetoria,22/04/2025
+108,Oficio,1045/2025,PM,22/04/2025
+109,Oficio,1046/2025,PEFOCE,23/04/2025
+110,Oficio,1047/2025,PEFOCE,23/04/2025
+111,Oficio,1048/2025,PEFOCE,23/04/2025
+112,Intimação,008/2025,Inspetoria,23/04/2025
+113,Intimação,009/2025,Inspetoria,23/04/2025
+114,Intimação,010/2025,Inspetoria,23/04/2025
+115,Intimação,011/2025,Inspetoria,23/04/2025
+116,Intimação,012/2025,Inspetoria,23/04/2025
+117,Oficio,1049/2025,MP,23/04/2025
+118,Oficio,1050/2025,PM,23/04/2025
+119,Oficio,1051/2025,hospital,23/04/2025
+120,Oficio,1052/2025,PM,23/04/2025
+121,Ordem de Missão,012/2025,Inspetoria,23/04/2025
+122,Ordem de Missão,013/2025,inspetoria,24/04/2025
+123,Oficio,1053/2025,MP,24/04/2025
+124,Oficio,1054/2025,pefoce,24/04/2025
+125,Oficio,1055/2025,pefoce,24/04/2025
+126,Oficio,1056/2025,pefoce,24/04/2025
+127,Oficio,1057/2025,PEFOCE,24/04/2025
+128,Oficio,1058/2025,PEFOCE,24/04/2025
+129,Oficio,1059/2025,pefoce,24/04/2025
+130,Oficio,1060/2025,PEFOCE,24/04/2025
+131,Oficio,1061/2025,PEFOCE,24/04/2025
+132,Oficio,1062/2025,PEFOCE,24/04/2025
+133,Oficio,1063/2025,PEFOCE,24/04/2025
+134,Oficio,1064/2025,PEFOCE,24/04/2025
+135,Verificação de Procedência de Informação - VPI,002/2025,Draco,25/04/2025
+136,Verificação de Procedência de Informação - VPI,003/2025,Draco,25/04/2025
+137,Verificação de Procedência de Informação - VPI,004/2025,Draco,25/04/2025
+138,Verificação de Procedência de Informação - VPI,005/2025,Draco,25/04/2025
+139,Verificação de Procedência de Informação - VPI,006/2025,Draco,25/04/2025
+140,Verificação de Procedência de Informação - VPI,007/2025,Draco,25/04/2025
+141,Verificação de Procedência de Informação - VPI,008/2025,Draco,25/04/2025
+142,Verificação de Procedência de Informação - VPI,009/2025,Draco,25/04/2025
+143,Verificação de Procedência de Informação - VPI,010/2025,Draco,25/04/2025
+144,Verificação de Procedência de Informação - VPI,011/2025,Draco,25/04/2025
+145,Verificação de Procedência de Informação - VPI,012/2025,Draco,25/04/2025
+146,Verificação de Procedência de Informação - VPI,013/2025,Draco,25/04/2025
+147,Verificação de Procedência de Informação - VPI,014/2025,Draco,25/04/2025
+148,Verificação de Procedência de Informação - VPI,015/2025,Draco,25/04/2025
+149,Verificação de Procedência de Informação - VPI,016/2025,Draco,25/04/2025
+150,Verificação de Procedência de Informação - VPI,017/2025,Draco,25/04/2025
+151,Ordem de Missão,014/2025,Draco,25/04/2025
+152,Ordem de Missão,015/2025,Draco,25/04/2025
+153,Oficio,1065/2025,DPJI,28/04/2025
+154,Oficio,1066/2025,Dgp,28/04/2025
+155,Oficio,1067/2025,Cogep,28/04/2025
+156,Oficio,1068/2025,Cogep,28/04/2025
+157,Oficio,1069/2025,DIP,28/04/2025
+158,Oficio,1070/2025,DIP,28/04/2025
+159,Oficio,1071/2025,Pefice,28/04/2025
+160,Oficio,1072/2025,UNINTA,28/04/2025
+161,Oficio,1073/2025,PC,29/04/2025
+162,Oficio,1074/2025,Pefoce,29/04/2025
+163,Oficio,1075/2025,Pefoce,29/04/2025
+164,Oficio,1076/2025,Pefoce,29/04/2025
+165,Ordem de Missão,016/2025,N.O,29/04/2025
+166,Oficio,1077/2025,Internet,30/04/2025
+167,Oficio,1078/2025,PEFOCE,30/04/2025
+168,Oficio,1079/2025,PEFOCE,30/04/2025
+169,Oficio,1080/2025,PEFOCE,30/04/2025
+170,Oficio,1081/2025,pm,30/04/2025
+174,Oficio,1086/2025,gerado pelo sistema,01/05/2025
+175,Protocolo,006/2025,gerador manual,01/05/2025
+176,Despacho,002/2025,gerador manual,01/05/2025
+177,Ordem de Missão,017/2025,gerador manual,01/05/2025
+178,Relatório Policial,005/2025,gerador manual,01/05/2025
+179,Intimação,013/2025,gerador manual,01/05/2025
