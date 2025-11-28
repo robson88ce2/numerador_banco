@@ -1,12 +1,16 @@
 from datetime import datetime
-import psycopg2
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, Column, Integer, String, Sequence, text
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
 from urllib.parse import quote_plus
 import csv
+import logging
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+# Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Base declarativa
 Base = declarative_base()
@@ -21,105 +25,133 @@ class Documento(Base):
     data_emissao = Column(String, nullable=False)
     ano = Column(Integer, nullable=True)  # Adicionando coluna 'ano' para armazenar o ano de emissão
 
-# Função para criar engine
+# Função para criar engine (cacheada — o engine implementa pool internamente)
 @st.cache_resource
 def get_engine():
     secrets = st.secrets["postgres"]
     password = quote_plus(secrets["password"])
     url = f"postgresql://{secrets['user']}:{password}@{secrets['host']}:{secrets['port']}/{secrets['dbname']}"
-    return create_engine(url)
+    # echo=False por padrão; pode ativar para debug (mostra SQL)
+    return create_engine(url, pool_pre_ping=True)
 
 # Criar tabelas
 def create_tables():
     engine = get_engine()
     Base.metadata.create_all(engine)
 
-# Conexão com o banco
-@st.cache_resource
-def get_db_connection():
-    secrets = st.secrets["postgres"]
-    return psycopg2.connect(
-        host=secrets["host"],
-        port=secrets["port"],
-        dbname=secrets["dbname"],
-        user=secrets["user"],
-        password=secrets["password"]
-    )
-
-# Executar queries
-@st.cache_data(show_spinner=False)
+# Helper para executar queries (usa transactions para write; conexões diretas para fetch)
 def execute_query(query, params=None, fetch=False):
+    engine = get_engine()
     try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params or ())
-                if fetch:
-                    return cursor.fetchall()
-                conn.commit()
-    except psycopg2.Error as e:
+        if fetch:
+            # operação de leitura simples
+            with engine.connect() as conn:
+                result = conn.execute(text(query), params or {})
+                rows = result.fetchall()
+                return rows
+        else:
+            # operação de escrita em transação (commit automático ao sair do bloco)
+            with engine.begin() as conn:
+                conn.execute(text(query), params or {})
+                return True
+    except SQLAlchemyError as e:
+        # Mostra no Streamlit e log para os logs do servidor
         st.error(f"Erro no banco de dados: {e}")
+        logger.exception("Erro SQL - query: %s | params: %r", query, params)
         return None
 
 # Criar ou atualizar índice
 def create_or_update_index(tipo):
+    # garante tabela indices
     execute_query("""
         CREATE TABLE IF NOT EXISTS indices (
             tipo TEXT PRIMARY KEY,
-            ultimo_numero INTEGER DEFAULT 0
+            ultimo_numero BIGINT DEFAULT 0
         )
     """)
+    # garante linha do tipo
     execute_query("""
         INSERT INTO indices (tipo, ultimo_numero)
-        VALUES (%s, 0)
-        ON CONFLICT (tipo)
-        DO NOTHING
-    """, (tipo,))
+        VALUES (:tipo, 0)
+        ON CONFLICT (tipo) DO NOTHING
+    """, {"tipo": tipo})
 
-# Próximo número
+# Próximo número (atômico e seguro)
 def get_next_number(tipo):
-    with get_db_connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT ultimo_numero FROM indices WHERE tipo = %s", (tipo,))
-            row = cursor.fetchone()
-            novo_numero = (row[0] + 1) if row else 1
+    if not tipo or not isinstance(tipo, str):
+        raise ValueError("tipo inválido (deve ser string não-vazia)")
 
-            cursor.execute("""
-                INSERT INTO indices (tipo, ultimo_numero)
-                VALUES (%s, %s)
+    engine = get_engine()
+    try:
+        with engine.begin() as conn:
+            # Insere com 1 se não existir, caso exista incrementa e retorna o valor atualizado
+            q = text("""
+                INSERT INTO indices(tipo, ultimo_numero)
+                VALUES (:tipo, 1)
                 ON CONFLICT (tipo)
-                DO UPDATE SET ultimo_numero = EXCLUDED.ultimo_numero
-            """, (tipo, novo_numero))
-            conn.commit()
+                DO UPDATE SET ultimo_numero = indices.ultimo_numero + 1
+                RETURNING ultimo_numero
+            """)
+            result = conn.execute(q, {"tipo": tipo})
+            novo = result.scalar_one()  # retorna o valor de ultimo_numero
+    except SQLAlchemyError as e:
+        logger.exception("Falha ao obter next number para tipo=%s", tipo)
+        raise
 
-    return f"{466}-{novo_numero:03d}/{datetime.now().year}"
+    # Formato do número: prefixo fixo 466 - ajuste conforme desejar
+    return f"{466}-{int(novo):03d}/{datetime.now().year}"
 
-# Salvar documento
+# Salvar documento (tratando Unique violation e tentando novamente se necessário)
 def save_document(tipo, destino, data_emissao):
+    if not destino or not destino.strip():
+        raise ValueError("Destino inválido")
+
+    # tenta até conseguir inserir (caso raro de colisão de número)
     while True:
         numero = get_next_number(tipo)
-        ano = datetime.now().year  # Ano extraído do número de documento
-        try:
-            execute_query("""
-                INSERT INTO documentos (tipo, numero, destino, data_emissao, ano)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (tipo, numero, destino, data_emissao, ano))
-            return numero
-        except psycopg2.errors.UniqueViolation:
-            continue
+        ano = datetime.now().year
 
-# Backup dos documentos
+        engine = get_engine()
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("""
+                    INSERT INTO documentos (tipo, numero, destino, data_emissao, ano)
+                    VALUES (:tipo, :numero, :destino, :data_emissao, :ano)
+                """), {
+                    "tipo": tipo,
+                    "numero": numero,
+                    "destino": destino,
+                    "data_emissao": data_emissao,
+                    "ano": ano
+                })
+            # sucesso
+            return numero
+        except IntegrityError as ie:
+            # Pode ocorrer UNIQUE violation raramente — re-tentar com novo número
+            logger.warning("IntegrityError ao inserir documento (numero=%s). Tentando novamente. Detalhe: %s", numero, ie)
+            # laço recomeça
+            continue
+        except SQLAlchemyError as e:
+            logger.exception("Erro ao inserir documento: %s", e)
+            st.error(f"Erro ao salvar documento: {e}")
+            raise
+
+# Backup dos documentos (gera arquivo local e permite download via Streamlit)
 def backup_documentos():
     try:
-        dados = execute_query("SELECT * FROM documentos ORDER BY id", fetch=True)
-        if dados:
-            with open("backup_documentos.csv", "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["id", "tipo", "numero", "destino", "data_emissao", "ano"])
-                writer.writerows(dados)
+        engine = get_engine()
+        df = pd.read_sql("SELECT id, tipo, numero, destino, data_emissao, ano FROM documentos ORDER BY id", con=engine)
+        if not df.empty:
+            csv_path = "backup_documentos.csv"
+            df.to_csv(csv_path, index=False, encoding="utf-8")
             st.success("📦 Backup realizado com sucesso: backup_documentos.csv")
+            # disponibiliza download
+            with open(csv_path, "rb") as f:
+                st.download_button("📥 Baixar backup_documentos.csv", f, file_name=csv_path, mime="text/csv")
         else:
             st.warning("Nenhum dado para backup.")
     except Exception as e:
+        logger.exception("Erro ao fazer backup")
         st.error(f"Erro ao fazer backup: {e}")
 
 # Login
@@ -145,6 +177,7 @@ def login():
 
 # Principal
 def main():
+    # Cria tabelas e índices iniciais
     create_tables()
     create_or_update_index("Oficio")
     create_or_update_index("Protocolo")
@@ -156,6 +189,7 @@ def main():
         """)
     except Exception as e:
         st.error(f"Erro ao adicionar coluna 'ano': {e}")
+        logger.exception("Erro alter table ano")
 
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
@@ -190,10 +224,13 @@ def main():
 
             if submit_button:
                 if destino.strip():
-                    numero = save_document(tipo, destino, data_emissao)
-                    if numero:
-                        st.success(f"📄 Número **{numero}** gerado com sucesso para **{tipo}**!")
-                        st.code(numero, language="text")
+                    try:
+                        numero = save_document(tipo, destino, data_emissao)
+                        if numero:
+                            st.success(f"📄 Número **{numero}** gerado com sucesso para **{tipo}**!")
+                            st.code(numero, language="text")
+                    except Exception as e:
+                        st.error(f"Erro ao gerar número: {e}")
                 else:
                     st.error("Por favor, informe o destino.")
 
@@ -210,6 +247,7 @@ def main():
                 else:
                     st.warning("Nenhum documento encontrado.")
             except Exception as e:
+                logger.exception("Erro ao carregar histórico")
                 st.error(f"Erro ao carregar dados: {e}")
 
         elif menu == "🔁 Status":
@@ -241,30 +279,40 @@ def main():
                                 df_idx = pd.read_csv(uploaded_idx)
 
                                 engine = get_engine()  # Definindo a conexão com o banco usando o engine
-                                with engine.connect() as conn:
-                                    conn.execute("DELETE FROM documentos")
-                                    conn.execute("DELETE FROM indices")
+                                with engine.begin() as conn:
+                                    conn.execute(text("DELETE FROM documentos"))
+                                    conn.execute(text("DELETE FROM indices"))
 
                                     for _, row in df_doc.iterrows():
-                                        conn.execute("""
+                                        conn.execute(text("""
                                             INSERT INTO documentos (tipo, numero, destino, data_emissao, ano)
-                                            VALUES (%s, %s, %s, %s, %s)
-                                        """, (row['tipo'], row['numero'], row['destino'], row['data_emissao'], row['ano']))
+                                            VALUES (:tipo, :numero, :destino, :data_emissao, :ano)
+                                        """), {
+                                            "tipo": row['tipo'],
+                                            "numero": row['numero'],
+                                            "destino": row['destino'],
+                                            "data_emissao": row['data_emissao'],
+                                            "ano": int(row['ano']) if not pd.isna(row['ano']) else None
+                                        })
 
                                     for _, row in df_idx.iterrows():
-                                        conn.execute("""
+                                        conn.execute(text("""
                                             INSERT INTO indices (tipo, ultimo_numero)
-                                            VALUES (%s, %s)
-                                        """, (row['tipo'], row['ultimo_numero']))
+                                            VALUES (:tipo, :ultimo_numero)
+                                        """), {
+                                            "tipo": row['tipo'],
+                                            "ultimo_numero": int(row['ultimo_numero'])
+                                        })
 
                                     st.success("✅ Backup restaurado com sucesso!")
                             except Exception as e:
+                                logger.exception("Erro na restauração do backup")
                                 st.error(f"Erro na restauração: {e}")
                         else:
                             st.warning("Você precisa enviar os dois arquivos para restaurar.")
             except Exception as e:
+                logger.exception("Erro no bloco Backup e Restauração")
                 st.error(f"Erro ao conectar ao banco: {e}")
-
 
         elif menu == "🚪 Sair":
             st.session_state["authenticated"] = False
